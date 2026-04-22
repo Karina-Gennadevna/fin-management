@@ -1,16 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+const isSupabaseConfigured = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  return url.startsWith('http') && !url.includes('placeholder')
+}
 
-  if (!user) redirect('/login')
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  let userEmail = 'demo@example.com'
+
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      const { redirect } = await import('next/navigation')
+      redirect('/login')
+    }
+    userEmail = user?.email ?? userEmail
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: '#0f0f13' }}>
-      <Sidebar userEmail={user.email ?? ''} />
+      <Sidebar userEmail={userEmail} />
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
