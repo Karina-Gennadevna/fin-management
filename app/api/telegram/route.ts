@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Ищем категорию, если нет — создаём автоматически
-  let cat = categories?.find(c => c.name === parsed.category_name)
+  let cat = categories?.find(c => c.name.toLowerCase() === parsed.category_name?.toLowerCase())
   let isNewCategory = false
 
   if (!cat && parsed.category_name) {
