@@ -132,12 +132,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  // Обновляем баланс счёта
+  const delta = parsed.type === 'income' ? Number(parsed.amount) : -Number(parsed.amount)
+  const { data: freshAccount } = await supabase.from('accounts').select('balance').eq('id', account.id).single()
+  if (freshAccount) {
+    await supabase.from('accounts').update({ balance: Number(freshAccount.balance) + delta }).eq('id', account.id)
+  }
+
   const emoji = parsed.type === 'income' ? '📈' : '📉'
   const sign = parsed.type === 'income' ? '+' : '−'
   const amount = Number(parsed.amount).toLocaleString('ru-RU')
+  const newBalance = freshAccount ? (Number(freshAccount.balance) + delta).toLocaleString('ru-RU') : '—'
 
   await send(chatId,
-    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}\n\n<i>Добавлено в ${account.name}</i>`
+    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`
   )
 
   return NextResponse.json({ ok: true })
