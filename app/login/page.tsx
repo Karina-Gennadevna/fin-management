@@ -21,7 +21,11 @@ export default function LoginPage() {
     const supabase = createClient()
 
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${location.origin}/auth/callback` },
+      })
       if (error) {
         setMessage(error.message)
       } else {
