@@ -102,7 +102,9 @@ export async function POST(request: NextRequest) {
 
   let parsed: { type?: string; amount?: number; description?: string; category_name?: string | null; error?: string }
   try {
-    const raw = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text.trim() : ''
+    let raw = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text.trim() : ''
+    // Убираем markdown-обёртку если Claude вернул ```json ... ```
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
     parsed = JSON.parse(raw)
   } catch {
     await send(chatId, '❌ Не понял. Попробуй написать иначе:\n• "500 кофе"\n• "потратила 1200 на продукты"\n• "зарплата 60000"')
