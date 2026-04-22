@@ -113,10 +113,10 @@ export default function TransactionsList({ initialTransactions, accounts, catego
               onClick={() => setFilter(f)}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
               style={{
-                background: filter === f ? (f === 'income' ? '#10b981' : f === 'expense' ? '#ef4444' : '#6366f1') : '#1a1a24',
-                color: filter === f ? 'white' : '#9090a8',
+                background: filter === f ? (f === 'income' ? '#10b981' : f === 'expense' ? '#ef4444' : '#C4A56A') : '#111111',
+                color: filter === f ? 'white' : '#666666',
                 border: '1px solid',
-                borderColor: filter === f ? 'transparent' : '#2a2a3a',
+                borderColor: filter === f ? 'transparent' : '#1E1E1E',
               }}
             >
               {f === 'all' ? 'Все' : f === 'income' ? 'Доходы' : 'Расходы'}
@@ -126,17 +126,17 @@ export default function TransactionsList({ initialTransactions, accounts, catego
         <button
           onClick={openNew}
           className="px-4 py-2 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
-          style={{ background: '#6366f1' }}
+          style={{ background: '#C4A56A' }}
         >
           + Добавить
         </button>
       </div>
 
       {/* Список */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
         {filtered.length === 0 ? (
           <div className="p-8 text-center">
-            <p style={{ color: '#9090a8' }}>Нет транзакций</p>
+            <p style={{ color: '#666666' }}>Нет транзакций</p>
           </div>
         ) : (
           <div>
@@ -144,17 +144,17 @@ export default function TransactionsList({ initialTransactions, accounts, catego
               <div
                 key={t.id}
                 className="flex items-center gap-3 px-5 py-3.5 hover:bg-white/5 transition-colors"
-                style={{ borderBottom: i < filtered.length - 1 ? '1px solid #2a2a3a' : 'none' }}
+                style={{ borderBottom: i < filtered.length - 1 ? '1px solid #1E1E1E' : 'none' }}
               >
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm shrink-0"
-                  style={{ background: (t.category as Category)?.color ? (t.category as Category).color + '25' : '#6366f120', color: (t.category as Category)?.color ?? '#6366f1' }}>
+                  style={{ background: (t.category as Category)?.color ? (t.category as Category).color + '25' : '#C4A56A20', color: (t.category as Category)?.color ?? '#C4A56A' }}>
                   {t.type === 'income' ? '↑' : '↓'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
                     {t.description || (t.category as Category)?.name || 'Без описания'}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: '#9090a8' }}>
+                  <p className="text-xs mt-0.5" style={{ color: '#666666' }}>
                     {formatDate(t.date)} · {(t.account as Account)?.name} {(t.category as Category) ? `· ${(t.category as Category).name}` : ''}
                   </p>
                 </div>
@@ -162,7 +162,7 @@ export default function TransactionsList({ initialTransactions, accounts, catego
                   {t.type === 'income' ? '+' : '−'}{formatCurrency(t.amount)}
                 </span>
                 <div className="flex gap-1 shrink-0">
-                  <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-xs hover:bg-white/10" style={{ color: '#9090a8' }}>✎</button>
+                  <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-xs hover:bg-white/10" style={{ color: '#666666' }}>✎</button>
                   <button onClick={() => handleDelete(t.id)} className="p-1.5 rounded-lg text-xs hover:bg-red-500/20" style={{ color: '#ef4444' }}>✕</button>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function TransactionsList({ initialTransactions, accounts, catego
       {/* Модальное окно формы */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: '#000000aa' }}>
-          <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+          <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
             <h3 className="text-lg font-semibold text-white mb-5">
               {editing ? 'Редактировать' : 'Новая транзакция'}
             </h3>
@@ -188,10 +188,10 @@ export default function TransactionsList({ initialTransactions, accounts, catego
                     onClick={() => setForm(f => ({ ...f, type, category_id: '' }))}
                     className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
                     style={{
-                      background: form.type === type ? (type === 'income' ? '#10b981' : '#ef4444') : '#0f0f13',
-                      color: form.type === type ? 'white' : '#9090a8',
+                      background: form.type === type ? (type === 'income' ? '#10b981' : '#ef4444') : '#0A0A0A',
+                      color: form.type === type ? 'white' : '#666666',
                       border: '1px solid',
-                      borderColor: form.type === type ? 'transparent' : '#2a2a3a',
+                      borderColor: form.type === type ? 'transparent' : '#1E1E1E',
                     }}
                   >
                     {type === 'income' ? 'Доход' : 'Расход'}
@@ -201,25 +201,25 @@ export default function TransactionsList({ initialTransactions, accounts, catego
 
               {/* Сумма */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Сумма ₽</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Сумма ₽</label>
                 <input
                   type="number"
                   value={form.amount}
                   onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
                   placeholder="0"
                   className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E' }}
                 />
               </div>
 
               {/* Счёт */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Счёт</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Счёт</label>
                 <select
                   value={form.account_id}
                   onChange={e => setForm(f => ({ ...f, account_id: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E' }}
                 >
                   <option value="">Выберите счёт</option>
                   {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -228,12 +228,12 @@ export default function TransactionsList({ initialTransactions, accounts, catego
 
               {/* Категория */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Категория</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Категория</label>
                 <select
                   value={form.category_id}
                   onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E' }}
                 >
                   <option value="">Без категории</option>
                   {filteredCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -242,26 +242,26 @@ export default function TransactionsList({ initialTransactions, accounts, catego
 
               {/* Описание */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Описание</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Описание</label>
                 <input
                   type="text"
                   value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Необязательно"
                   className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E' }}
                 />
               </div>
 
               {/* Дата */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Дата</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Дата</label>
                 <input
                   type="date"
                   value={form.date}
                   onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a', colorScheme: 'dark' }}
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E', colorScheme: 'dark' }}
                 />
               </div>
             </div>
@@ -270,7 +270,7 @@ export default function TransactionsList({ initialTransactions, accounts, catego
               <button
                 onClick={() => setShowForm(false)}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ background: '#0f0f13', color: '#9090a8', border: '1px solid #2a2a3a' }}
+                style={{ background: '#0A0A0A', color: '#666666', border: '1px solid #1E1E1E' }}
               >
                 Отмена
               </button>
@@ -278,7 +278,7 @@ export default function TransactionsList({ initialTransactions, accounts, catego
                 onClick={handleSave}
                 disabled={loading}
                 className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
-                style={{ background: '#6366f1' }}
+                style={{ background: '#C4A56A' }}
               >
                 {loading ? 'Сохранение...' : 'Сохранить'}
               </button>

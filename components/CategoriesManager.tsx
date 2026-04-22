@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Category } from '@/lib/types'
 
-const COLORS = ['#6366f1','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#22c55e','#14b8a6','#f97316','#64748b','#d946ef']
-const emptyForm = { name: '', type: 'expense' as 'income' | 'expense', color: '#6366f1' }
+const COLORS = ['#C4A56A','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#22c55e','#14b8a6','#f97316','#64748b','#d946ef']
+const emptyForm = { name: '', type: 'expense' as 'income' | 'expense', color: '#C4A56A' }
 
 export default function CategoriesManager({ initialCategories, userId }: { initialCategories: Category[]; userId: string }) {
   const [categories, setCategories] = useState(initialCategories)
@@ -50,27 +50,27 @@ export default function CategoriesManager({ initialCategories, userId }: { initi
         {(['expense', 'income'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className="px-4 py-1.5 rounded-xl text-sm font-medium transition-all"
-            style={{ background: tab === t ? '#6366f1' : '#1a1a24', color: tab === t ? 'white' : '#9090a8', border: '1px solid', borderColor: tab === t ? 'transparent' : '#2a2a3a' }}>
+            style={{ background: tab === t ? '#C4A56A' : '#111111', color: tab === t ? 'white' : '#666666', border: '1px solid', borderColor: tab === t ? 'transparent' : '#1E1E1E' }}>
             {t === 'expense' ? 'Расходы' : 'Доходы'}
           </button>
         ))}
-        <button onClick={openNew} className="ml-auto px-4 py-1.5 rounded-xl text-sm font-medium text-white hover:opacity-90" style={{ background: '#6366f1' }}>
+        <button onClick={openNew} className="ml-auto px-4 py-1.5 rounded-xl text-sm font-medium text-white hover:opacity-90" style={{ background: '#C4A56A' }}>
           + Добавить
         </button>
       </div>
 
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
         {filtered.length === 0 ? (
-          <div className="p-8 text-center"><p style={{ color: '#9090a8' }}>Нет категорий</p></div>
+          <div className="p-8 text-center"><p style={{ color: '#666666' }}>Нет категорий</p></div>
         ) : (
           filtered.map((c, i) => (
             <div key={c.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-white/5 transition-colors"
-              style={{ borderBottom: i < filtered.length - 1 ? '1px solid #2a2a3a' : 'none' }}>
+              style={{ borderBottom: i < filtered.length - 1 ? '1px solid #1E1E1E' : 'none' }}>
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm"
                 style={{ background: c.color + '25', color: c.color }}>●</div>
               <span className="flex-1 text-sm font-medium text-white">{c.name}</span>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-xs hover:bg-white/10" style={{ color: '#9090a8' }}>✎</button>
+                <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-xs hover:bg-white/10" style={{ color: '#666666' }}>✎</button>
                 <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg text-xs hover:bg-red-500/20" style={{ color: '#ef4444' }}>✕</button>
               </div>
             </div>
@@ -80,29 +80,29 @@ export default function CategoriesManager({ initialCategories, userId }: { initi
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: '#000000aa' }}>
-          <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+          <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
             <h3 className="text-lg font-semibold text-white mb-5">{editing ? 'Редактировать' : 'Новая категория'}</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Тип</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Тип</label>
                 <div className="flex gap-2">
                   {(['expense', 'income'] as const).map(t => (
                     <button key={t} onClick={() => setForm(f => ({ ...f, type: t }))}
                       className="flex-1 py-2 rounded-xl text-sm font-medium"
-                      style={{ background: form.type === t ? '#6366f1' : '#0f0f13', color: form.type === t ? 'white' : '#9090a8', border: '1px solid', borderColor: form.type === t ? 'transparent' : '#2a2a3a' }}>
+                      style={{ background: form.type === t ? '#C4A56A' : '#0A0A0A', color: form.type === t ? 'white' : '#666666', border: '1px solid', borderColor: form.type === t ? 'transparent' : '#1E1E1E' }}>
                       {t === 'expense' ? 'Расход' : 'Доход'}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Название</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Название</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Название категории" className="w-full px-4 py-2.5 rounded-xl text-white outline-none"
-                  style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }} />
+                  style={{ background: '#0A0A0A', border: '1px solid #1E1E1E' }} />
               </div>
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#9090a8' }}>Цвет</label>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: '#666666' }}>Цвет</label>
                 <div className="flex gap-2 flex-wrap">
                   {COLORS.map(c => (
                     <button key={c} onClick={() => setForm(f => ({ ...f, color: c }))}
@@ -114,9 +114,9 @@ export default function CategoriesManager({ initialCategories, userId }: { initi
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowForm(false)} className="flex-1 py-2.5 rounded-xl text-sm font-medium"
-                style={{ background: '#0f0f13', color: '#9090a8', border: '1px solid #2a2a3a' }}>Отмена</button>
+                style={{ background: '#0A0A0A', color: '#666666', border: '1px solid #1E1E1E' }}>Отмена</button>
               <button onClick={handleSave} disabled={loading} className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
-                style={{ background: '#6366f1' }}>{loading ? 'Сохранение...' : 'Сохранить'}</button>
+                style={{ background: '#C4A56A' }}>{loading ? 'Сохранение...' : 'Сохранить'}</button>
             </div>
           </div>
         </div>

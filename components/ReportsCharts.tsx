@@ -39,7 +39,7 @@ export default function ReportsCharts({ transactions }: Props) {
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0)
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0)
 
-  const tooltipStyle = { background: '#1a1a24', border: '1px solid #2a2a3a', borderRadius: 8, color: '#f1f1f3' }
+  const tooltipStyle = { background: '#111111', border: '1px solid #1E1E1E', borderRadius: 8, color: '#f1f1f3' }
 
   return (
     <div className="space-y-4">
@@ -49,22 +49,22 @@ export default function ReportsCharts({ transactions }: Props) {
           { label: 'Расходы за 6 месяцев', value: formatCurrency(totalExpense), color: '#ef4444' },
           { label: 'Сальдо', value: formatCurrency(totalIncome - totalExpense), color: totalIncome - totalExpense >= 0 ? '#10b981' : '#ef4444' },
         ].map(s => (
-          <div key={s.label} className="rounded-2xl p-4" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
-            <p className="text-xs mb-1" style={{ color: '#9090a8' }}>{s.label}</p>
+          <div key={s.label} className="rounded-2xl p-4" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
+            <p className="text-xs mb-1" style={{ color: '#666666' }}>{s.label}</p>
             <p className="text-xl font-bold" style={{ color: s.color }}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="rounded-2xl p-5" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+      <div className="rounded-2xl p-5" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
         <h2 className="font-semibold text-white mb-4">Доходы и расходы по месяцам</h2>
         {monthData.length === 0 ? (
-          <p className="text-sm" style={{ color: '#9090a8' }}>Нет данных</p>
+          <p className="text-sm" style={{ color: '#666666' }}>Нет данных</p>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthData} barGap={4}>
-              <XAxis dataKey="month" tick={{ fill: '#9090a8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#9090a8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${(Number(v)/1000).toFixed(0)}k`} />
+              <XAxis dataKey="month" tick={{ fill: '#666666', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#666666', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${(Number(v)/1000).toFixed(0)}k`} />
               <Tooltip contentStyle={tooltipStyle} formatter={currencyFormatter} />
               <Bar dataKey="income" name="Доходы" fill="#10b981" radius={[4,4,0,0]} />
               <Bar dataKey="expense" name="Расходы" fill="#ef4444" radius={[4,4,0,0]} />
@@ -73,10 +73,10 @@ export default function ReportsCharts({ transactions }: Props) {
         )}
       </div>
 
-      <div className="rounded-2xl p-5" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
+      <div className="rounded-2xl p-5" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
         <h2 className="font-semibold text-white mb-4">Расходы по категориям</h2>
         {catData.length === 0 ? (
-          <p className="text-sm" style={{ color: '#9090a8' }}>Нет данных</p>
+          <p className="text-sm" style={{ color: '#666666' }}>Нет данных</p>
         ) : (
           <div className="flex flex-col lg:flex-row items-center gap-6">
             <div style={{ width: 200, height: 200, flexShrink: 0 }}>
@@ -99,9 +99,9 @@ export default function ReportsCharts({ transactions }: Props) {
                         <div className="w-2.5 h-2.5 rounded-full" style={{ background: c.color }} />
                         <span className="text-white">{c.name}</span>
                       </div>
-                      <span style={{ color: '#9090a8' }}>{formatCurrency(c.value)} ({pct}%)</span>
+                      <span style={{ color: '#666666' }}>{formatCurrency(c.value)} ({pct}%)</span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#0f0f13' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#0A0A0A' }}>
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, background: c.color }} />
                     </div>
                   </div>

@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState('')
   const router = useRouter()
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setMessage('')
@@ -40,38 +40,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0f0f13' }}>
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: '#6366f1' }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-12 h-12 mb-5" style={{ background: '#C4A56A', color: '#0A0A0A' }}>
+            <span className="text-xl">✦</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Мои финансы</h1>
-          <p style={{ color: '#9090a8' }} className="mt-1 text-sm">
-            {isSignUp ? 'Создайте аккаунт' : 'Войдите в свой аккаунт'}
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', fontWeight: 400, color: '#F4EEE4', letterSpacing: '0.04em' }}>
+            Мои финансы
+          </h1>
+          <p className="mt-2 text-xs tracking-widest uppercase" style={{ color: '#666666', letterSpacing: '0.15em' }}>
+            {isSignUp ? 'Создать аккаунт' : 'Войти в систему'}
           </p>
         </div>
 
-        <div className="rounded-2xl p-6" style={{ background: '#1a1a24', border: '1px solid #2a2a3a' }}>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="p-7" style={{ background: '#111111', border: '1px solid #1E1E1E' }}>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-white mb-1.5">Email</label>
+              <label className="block text-xs uppercase tracking-widest mb-2" style={{ color: '#666666', letterSpacing: '0.12em' }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-2.5 rounded-xl text-white placeholder-gray-500 outline-none focus:ring-2 transition-all"
-                style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                className="w-full px-4 py-3 text-sm outline-none transition-all"
+                style={{ background: '#0A0A0A', border: '1px solid #1E1E1E', color: '#F4EEE4' }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-1.5">Пароль</label>
+              <label className="block text-xs uppercase tracking-widest mb-2" style={{ color: '#666666', letterSpacing: '0.12em' }}>Пароль</label>
               <input
                 type="password"
                 value={password}
@@ -79,14 +78,15 @@ export default function LoginPage() {
                 required
                 placeholder="••••••••"
                 minLength={6}
-                className="w-full px-4 py-2.5 rounded-xl text-white placeholder-gray-500 outline-none transition-all"
-                style={{ background: '#0f0f13', border: '1px solid #2a2a3a' }}
+                className="w-full px-4 py-3 text-sm outline-none transition-all"
+                style={{ background: '#0A0A0A', border: '1px solid #1E1E1E', color: '#F4EEE4' }}
               />
             </div>
 
             {message && (
-              <div className="text-sm p-3 rounded-lg" style={{
-                background: message.includes('Проверьте') ? '#10b98120' : '#ef444420',
+              <div className="text-sm p-3" style={{
+                background: message.includes('Проверьте') ? '#10b98115' : '#ef444415',
+                borderLeft: `2px solid ${message.includes('Проверьте') ? '#10b981' : '#ef4444'}`,
                 color: message.includes('Проверьте') ? '#10b981' : '#ef4444'
               }}>
                 {message}
@@ -96,20 +96,20 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 rounded-xl font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: '#6366f1' }}
+              className="w-full py-3 text-sm font-medium tracking-widest uppercase transition-all hover:opacity-85 disabled:opacity-40"
+              style={{ background: '#C4A56A', color: '#0A0A0A', letterSpacing: '0.12em' }}
             >
-              {loading ? 'Загрузка...' : isSignUp ? 'Создать аккаунт' : 'Войти'}
+              {loading ? '...' : isSignUp ? 'Создать аккаунт' : 'Войти'}
             </button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <button
               onClick={() => { setIsSignUp(!isSignUp); setMessage('') }}
-              className="text-sm hover:underline"
-              style={{ color: '#6366f1' }}
+              className="text-xs hover:opacity-70 transition-all"
+              style={{ color: '#C4A56A', letterSpacing: '0.08em' }}
             >
-              {isSignUp ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
+              {isSignUp ? 'Уже есть аккаунт — войти' : 'Нет аккаунта — зарегистрироваться'}
             </button>
           </div>
         </div>

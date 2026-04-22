@@ -36,7 +36,7 @@ export default async function BudgetsPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold text-white mb-2">Бюджеты</h1>
-      <p className="text-sm mb-6" style={{ color: '#9090a8' }}>Лимиты расходов на этот месяц</p>
+      <p className="text-sm mb-6" style={{ color: '#666666' }}>Лимиты расходов на этот месяц</p>
       {!isSupabaseConfigured() && (
         <div className="mb-4 rounded-2xl p-4" style={{ background: '#f59e0b15', border: '1px solid #f59e0b40' }}>
           <p className="text-sm" style={{ color: '#f59e0b' }}>⚠ Режим превью — подключите Supabase для работы с данными</p>
