@@ -116,7 +116,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  const cat = categories?.find(c => c.name === parsed.category_name)
+  // Ищем категорию, если нет — создаём автоматически
+  let cat = categories?.find(c => c.name === parsed.category_name)
+  let isNewCategory = false
+
+  if (!cat && parsed.category_name) {
+    const colors = ['#C4A56A','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#22c55e','#14b8a6','#f97316']
+    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+    const { data: newCat } = await supabase.from('categories').insert({
+      user_id: userId,
+      name: parsed.category_name,
+      type: parsed.type,
+      color: randomColor,
+      icon: 'tag',
+    }).select().single()
+    if (newCat) { cat = newCat; isNewCategory = true }
+  }
+
   const account = accounts[0]
 
   const { error: insertError } = await supabase.from('transactions').insert({
@@ -147,7 +163,7 @@ export async function POST(request: NextRequest) {
   const newBalance = freshAccount ? (Number(freshAccount.balance) + delta).toLocaleString('ru-RU') : '—'
 
   await send(chatId,
-    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`
+    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}${isNewCategory ? ' <i>(новая категория)</i>' : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`
   )
 
   return NextResponse.json({ ok: true })
