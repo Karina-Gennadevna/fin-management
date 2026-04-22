@@ -47,8 +47,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0A0A0A' }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-12 h-12 mb-5" style={{ background: '#C4A56A', color: '#0A0A0A' }}>
-            <span style={{ fontSize: '18px', fontWeight: 600 }}>₽</span>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-5" style={{ background: 'transparent', border: '1px solid #C4A56A', color: '#C4A56A' }}>
+            <span style={{ fontSize: '18px', fontWeight: 500 }}>₽</span>
           </div>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', fontWeight: 400, color: '#F4EEE4', letterSpacing: '0.04em' }}>
             Мои финансы
