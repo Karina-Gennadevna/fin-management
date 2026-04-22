@@ -9,16 +9,68 @@ const supabase = createClient(
 )
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
-async function send(chatId: number, text: string) {
+async function send(chatId: number, text: string, replyMarkup?: object) {
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML', reply_markup: replyMarkup }),
+  })
+}
+
+async function editMessage(chatId: number, messageId: number, text: string) {
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text, parse_mode: 'HTML' }),
+  })
+}
+
+async function answerCallback(callbackQueryId: string, text?: string) {
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ callback_query_id: callbackQueryId, text }),
   })
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
+
+  // Обработка нажатия кнопки "Отменить"
+  if (body.callback_query) {
+    const query = body.callback_query
+    const chatId: number = query.message.chat.id
+    const messageId: number = query.message.message_id
+    const data: string = query.data
+
+    if (data.startsWith('cancel:')) {
+      const transactionId = data.replace('cancel:', '')
+
+      // Получаем транзакцию перед удалением
+      const { data: tx } = await supabase
+        .from('transactions')
+        .select('amount, type, account_id')
+        .eq('id', transactionId)
+        .single()
+
+      if (tx) {
+        // Возвращаем баланс
+        const { data: acc } = await supabase.from('accounts').select('balance').eq('id', tx.account_id).single()
+        if (acc) {
+          const delta = tx.type === 'income' ? -Number(tx.amount) : Number(tx.amount)
+          await supabase.from('accounts').update({ balance: Number(acc.balance) + delta }).eq('id', tx.account_id)
+        }
+        await supabase.from('transactions').delete().eq('id', transactionId)
+        await editMessage(chatId, messageId, '↩️ <i>Запись отменена, баланс восстановлен</i>')
+      } else {
+        await editMessage(chatId, messageId, '❌ <i>Запись уже была удалена</i>')
+      }
+
+      await answerCallback(query.id, 'Отменено')
+    }
+    return NextResponse.json({ ok: true })
+  }
+
   const message = body.message
   if (!message?.text) return NextResponse.json({ ok: true })
 
@@ -103,7 +155,6 @@ export async function POST(request: NextRequest) {
   let parsed: { type?: string; amount?: number; description?: string; category_name?: string | null; error?: string }
   try {
     let raw = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text.trim() : ''
-    // Убираем markdown-обёртку если Claude вернул ```json ... ```
     raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
     parsed = JSON.parse(raw)
   } catch {
@@ -135,7 +186,7 @@ export async function POST(request: NextRequest) {
 
   const account = accounts[0]
 
-  const { error: insertError } = await supabase.from('transactions').insert({
+  const { data: newTx, error: insertError } = await supabase.from('transactions').insert({
     user_id: userId,
     account_id: account.id,
     category_id: cat?.id ?? null,
@@ -143,9 +194,9 @@ export async function POST(request: NextRequest) {
     amount: parsed.amount,
     description: parsed.description ?? null,
     date: new Date().toISOString().split('T')[0],
-  })
+  }).select('id').single()
 
-  if (insertError) {
+  if (insertError || !newTx) {
     await send(chatId, '❌ Ошибка сохранения. Попробуй ещё раз.')
     return NextResponse.json({ ok: true })
   }
@@ -162,8 +213,10 @@ export async function POST(request: NextRequest) {
   const amount = Number(parsed.amount).toLocaleString('ru-RU')
   const newBalance = freshAccount ? (Number(freshAccount.balance) + delta).toLocaleString('ru-RU') : '—'
 
-  await send(chatId,
-    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}${isNewCategory ? ' <i>(новая категория)</i>' : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`
+  await send(
+    chatId,
+    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}${isNewCategory ? ' <i>(новая категория)</i>' : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`,
+    { inline_keyboard: [[{ text: '↩️ Отменить', callback_data: `cancel:${newTx.id}` }]] }
   )
 
   return NextResponse.json({ ok: true })
