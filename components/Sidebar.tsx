@@ -31,8 +31,8 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
       style={{ background: '#080808', borderRight: '1px solid #1E1E1E' }}
     >
       <div className="flex items-center gap-3 px-3 mb-10">
-        <div className="w-8 h-8 rounded-sm flex items-center justify-center text-sm font-semibold" style={{ background: '#C4A56A', color: '#0A0A0A' }}>
-          ✦
+        <div className="w-8 h-8 rounded-sm flex items-center justify-center font-semibold" style={{ background: '#C4A56A', color: '#0A0A0A', fontSize: '15px' }}>
+          ₽
         </div>
         <span className="text-sm tracking-widest uppercase" style={{ color: '#F4EEE4', fontFamily: "'Cormorant Garamond', serif", letterSpacing: '0.12em' }}>Финансы</span>
       </div>
