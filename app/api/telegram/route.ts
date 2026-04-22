@@ -130,93 +130,111 @@ export async function POST(request: NextRequest) {
 
   const categoryList = categories?.map(c => `${c.name} (${c.type})`).join(', ') ?? ''
 
-  // Разбираем сообщение через Claude
+  // Разбираем сообщение через Claude (поддержка нескольких транзакций)
   const aiResponse = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 200,
+    max_tokens: 500,
     messages: [{
       role: 'user',
-      content: `Разбери финансовую транзакцию из текста. Верни ТОЛЬКО валидный JSON без markdown и пояснений.
+      content: `Разбери одну или несколько финансовых транзакций из текста. Верни ТОЛЬКО валидный JSON-массив без markdown.
 
-Текст пользователя: "${text}"
+Текст: "${text}"
 Доступные категории: ${categoryList}
 
 Правила:
 - type: "expense" для трат, "income" для поступлений
-- amount: число (только цифры, без символов)
+- amount: число (только цифры, сумма может быть без слова "руб" или "₽")
 - description: краткое описание на русском
-- category_name: ТОЧНОЕ название из списка категорий или null
+- category_name: ТОЧНОЕ название из списка или null
 
-Формат: {"type":"expense","amount":500,"description":"Кофе","category_name":"Кафе и рестораны"}
-Если не понял: {"error":"не понял"}`
+Если одна транзакция: [{"type":"expense","amount":500,"description":"Кофе","category_name":"Кафе и рестораны"}]
+Если несколько: [{"type":"expense","amount":500,"description":"Кофе","category_name":"Кафе и рестораны"},{"type":"expense","amount":1200,"description":"Продукты","category_name":"Еда и продукты"}]
+Если не понял: [{"error":"не понял"}]`
     }],
   })
 
-  let parsed: { type?: string; amount?: number; description?: string; category_name?: string | null; error?: string }
+  let items: Array<{ type?: string; amount?: number; description?: string; category_name?: string | null; error?: string }>
   try {
     let raw = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text.trim() : ''
     raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
-    parsed = JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    items = Array.isArray(parsed) ? parsed : [parsed]
   } catch {
-    await send(chatId, '❌ Не понял. Попробуй написать иначе:\n• "500 кофе"\n• "потратила 1200 на продукты"\n• "зарплата 60000"')
+    await send(chatId, '❌ Не понял. Примеры:\n• "500 кофе"\n• "кофе 300, такси 500, продукты 1200"\n• "зарплата 60000"')
     return NextResponse.json({ ok: true })
   }
 
-  if (parsed.error || !parsed.amount || !parsed.type) {
-    await send(chatId, '❌ Не смог разобрать сумму. Напиши например:\n• "350 кафе"\n• "зарплата 50000"')
+  if (!items.length || items[0].error) {
+    await send(chatId, '❌ Не смог разобрать. Напиши например:\n• "350 кафе"\n• "бензин 2500, продукты 800"')
     return NextResponse.json({ ok: true })
-  }
-
-  // Ищем категорию, если нет — создаём автоматически
-  let cat = categories?.find(c => c.name.toLowerCase() === parsed.category_name?.toLowerCase())
-  let isNewCategory = false
-
-  if (!cat && parsed.category_name) {
-    const colors = ['#C4A56A','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#22c55e','#14b8a6','#f97316']
-    const randomColor = colors[Math.floor(Math.random() * colors.length)]
-    const { data: newCat } = await supabase.from('categories').insert({
-      user_id: userId,
-      name: parsed.category_name,
-      type: parsed.type,
-      color: randomColor,
-      icon: 'tag',
-    }).select().single()
-    if (newCat) { cat = newCat; isNewCategory = true }
   }
 
   const account = accounts[0]
+  const today = new Date().toISOString().split('T')[0]
+  const colors = ['#C4A56A','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#8b5cf6','#22c55e','#14b8a6','#f97316']
 
-  const { data: newTx, error: insertError } = await supabase.from('transactions').insert({
-    user_id: userId,
-    account_id: account.id,
-    category_id: cat?.id ?? null,
-    type: parsed.type,
-    amount: parsed.amount,
-    description: parsed.description ?? null,
-    date: new Date().toISOString().split('T')[0],
-  }).select('id').single()
+  const lines: string[] = []
+  let totalDelta = 0
+  const txIds: string[] = []
 
-  if (insertError || !newTx) {
+  for (const item of items) {
+    if (!item.amount || !item.type) continue
+
+    // Ищем или создаём категорию
+    let cat = categories?.find(c => c.name.toLowerCase() === item.category_name?.toLowerCase())
+    let isNewCategory = false
+
+    if (!cat && item.category_name) {
+      const { data: newCat } = await supabase.from('categories').insert({
+        user_id: userId,
+        name: item.category_name,
+        type: item.type,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        icon: 'tag',
+      }).select().single()
+      if (newCat) { cat = newCat; isNewCategory = true }
+    }
+
+    const { data: newTx } = await supabase.from('transactions').insert({
+      user_id: userId,
+      account_id: account.id,
+      category_id: cat?.id ?? null,
+      type: item.type,
+      amount: item.amount,
+      description: item.description ?? null,
+      date: today,
+    }).select('id').single()
+
+    if (newTx) txIds.push(newTx.id)
+
+    const delta = item.type === 'income' ? Number(item.amount) : -Number(item.amount)
+    totalDelta += delta
+
+    const emoji = item.type === 'income' ? '📈' : '📉'
+    const sign = item.type === 'income' ? '+' : '−'
+    lines.push(`${emoji} <b>${sign}${Number(item.amount).toLocaleString('ru-RU')} ₽</b> — ${item.description}${cat ? ` · ${cat.name}` : ''}${isNewCategory ? ' <i>(новая)</i>' : ''}`)
+  }
+
+  if (!lines.length) {
     await send(chatId, '❌ Ошибка сохранения. Попробуй ещё раз.')
     return NextResponse.json({ ok: true })
   }
 
-  // Обновляем баланс счёта
-  const delta = parsed.type === 'income' ? Number(parsed.amount) : -Number(parsed.amount)
+  // Обновляем баланс
   const { data: freshAccount } = await supabase.from('accounts').select('balance').eq('id', account.id).single()
   if (freshAccount) {
-    await supabase.from('accounts').update({ balance: Number(freshAccount.balance) + delta }).eq('id', account.id)
+    await supabase.from('accounts').update({ balance: Number(freshAccount.balance) + totalDelta }).eq('id', account.id)
   }
+  const newBalance = freshAccount ? (Number(freshAccount.balance) + totalDelta).toLocaleString('ru-RU') : '—'
 
-  const emoji = parsed.type === 'income' ? '📈' : '📉'
-  const sign = parsed.type === 'income' ? '+' : '−'
-  const amount = Number(parsed.amount).toLocaleString('ru-RU')
-  const newBalance = freshAccount ? (Number(freshAccount.balance) + delta).toLocaleString('ru-RU') : '—'
+  const replyText = lines.join('\n') + `\n\n<i>${account.name}: ${newBalance} ₽</i>`
 
   await send(
     chatId,
-    `${emoji} <b>${sign}${amount} ₽</b>\n${parsed.description}${cat ? ` · ${cat.name}` : ''}${isNewCategory ? ' <i>(новая категория)</i>' : ''}\n\n<i>${account.name}: ${newBalance} ₽</i>`,
-    { inline_keyboard: [[{ text: '↩️ Отменить', callback_data: `cancel:${newTx.id}` }]] }
+    replyText,
+    txIds.length === 1
+      ? { inline_keyboard: [[{ text: '↩️ Отменить', callback_data: `cancel:${txIds[0]}` }]] }
+      : undefined
   )
 
   return NextResponse.json({ ok: true })
